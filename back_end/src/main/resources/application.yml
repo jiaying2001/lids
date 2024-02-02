@@ -6,3 +6,8 @@ spring:
     url: jdbc:mysql://localhost:3306/lids?useUnicode=true&characterEncoding=utf-8
     username: root
     password: Hjy20011222.
+
+jwt:
+  tokenHeader: Authorization
+  secret: securesecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecret
+  tokenHead: 'Bearer '

@@ -21,8 +21,6 @@ public class JWTUtil {
     private static final String CLAIM_KEY_CREATED = "created";
     @Value("${jwt.secret}")
     private String secret;
-    @Value("${expiration}")
-    private Long expiration;
     @Value("${jwt.tokenHead}")
     private String tokenHead;
 
@@ -85,7 +83,7 @@ public class JWTUtil {
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_KEY_USERNAME, userDetails.getUsername());
-        claims.put(CLAIM_KEY_CREATED, new Date());
+        claims.put(CLAIM_KEY_CREATED, DateUtil.now());
         return generateToken(claims);
     }
 

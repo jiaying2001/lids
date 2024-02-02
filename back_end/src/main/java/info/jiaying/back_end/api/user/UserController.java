@@ -12,14 +12,15 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Autowired
     private UserService userService;
-    @GetMapping("/register")
+    @PostMapping("/register")
     public CommonResponse register(@RequestBody UserSignUpParams userSignUpParams) {
         userService.register(userSignUpParams);
-        return new CommonResponse();
+        return CommonResponse.success();
     }
 
     @PostMapping("/login")
-    public CommonResponse login(@RequestBody UserLoginParams request) {
-        return new CommonResponse();
+    public CommonResponse login(@RequestBody UserLoginParams userLoginParams) {
+        String token = userService.login(userLoginParams.getUsername(), userLoginParams.getPassword());
+        return CommonResponse.success(token);
     }
 }
