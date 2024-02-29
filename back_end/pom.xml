@@ -80,7 +80,40 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+		<!--MyBatis分页插件-->
+		<dependency>
+			<groupId>com.github.pagehelper</groupId>
+			<artifactId>pagehelper-spring-boot-starter</artifactId>
+			<version>1.3.0</version>
+		</dependency>
+		<!--集成druid连接池-->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid-spring-boot-starter</artifactId>
+			<version>1.1.10</version>
+		</dependency>
+		<!-- MyBatis 生成器 -->
+		<dependency>
+			<groupId>org.mybatis.generator</groupId>
+			<artifactId>mybatis-generator-core</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>1.6.12</version>
+		</dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+            <version>2.0.45</version>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>

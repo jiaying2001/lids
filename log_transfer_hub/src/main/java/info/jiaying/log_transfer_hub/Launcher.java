@@ -1,25 +1,32 @@
 package info.jiaying.log_transfer_hub;
 
+import com.alibaba.fastjson2.JSONObject;
+import info.jiaying.log_transfer_hub.logparser.PIDLogParser;
+import info.jiaying.log_transfer_hub.logreceiver.TransactionLogReceiver;
+import info.jiaying.log_transfer_hub.message.LogMessage;
 import info.jiaying.log_transfer_hub.util.kafka.client.KafkaClient;
 import info.jiaying.log_transfer_hub.event.LogEvent;
 import info.jiaying.log_transfer_hub.logdispatcher.LogDispatcher;
 import info.jiaying.log_transfer_hub.logdispatcher.ObserverManager;
-import info.jiaying.log_transfer_hub.logreceiver.LogReceiver;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 
 public class Launcher {
     private final ObserverManager logDispatcher = new LogDispatcher();
 
     public Launcher() {
-        logDispatcher.addReceiver(new LogReceiver());
+//        logDispatcher.addReceiver(new LogReceiver());
+        logDispatcher.addReceiver(new TransactionLogReceiver());
     }
 
     public void launch() throws InvocationTargetException, IllegalAccessException, InterruptedException {
         for (;;) {
-            String logJson = KafkaClient.get();
-            if (logJson != null) {
-                logDispatcher.dispatch(LogEvent.ONRECEIVE, logJson);
+            String msg = KafkaClient.get();
+            if (msg != null) {
+               LogMessage logMessage = JSONObject.parseObject(msg, LogMessage.class);
+               logMessage.getHeader().setTopic(logMessage.getHeader().getOs() + "_" + logMessage.getHeader().getAppName() + "_public");
+               logDispatcher.dispatch(LogEvent.ONRECEIVE, logMessage);
             }
             Thread.sleep(1000);
         }

@@ -1,5 +1,7 @@
 package info.jiaying.log_transfer_hub.util.kafka.client;
 
+import com.alibaba.fastjson2.JSONObject;
+import info.jiaying.log_transfer_hub.message.LogTransactionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -19,21 +21,23 @@ public class KafkaClient {
 
     static {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "124.221.34.29:9092");
-        props.put("group.id", "secure2");
+//        props.put("bootstrap.servers", "124.221.34.29:9092");
+        props.put("bootstrap.servers", "jiaying.info:9092");
+        props.put("group.id", "l1");
         props.put("enable.auto.commit", "true");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("max.poll.records", 1);
         consumer = new KafkaConsumer<>(props);
-        consumer.subscribe(Arrays.asList("secure"));
+        consumer.subscribe(Arrays.asList("log_queue"));
     }
 
     static Producer<String, String> producer;
 
     static {
         Properties props = new Properties();
-        props.put("bootstrap.servers", "124.221.34.29:9092");
+//        props.put("bootstrap.servers", "124.221.34.29:9092");
+        props.put("bootstrap.servers", "jiaying.info:9092");
         props.put("acks", "all");
         props.put("retries", 0);
         props.put("batch.size", 16384);
@@ -58,6 +62,12 @@ public class KafkaClient {
     static public void send(String topic, String value) {
         log.info("Sent " + value + " to "  + topic);
         producer.send(new ProducerRecord<>(topic, value));
+    }
+
+    static public void send(String topic, Object value) {
+        log.info("Sent " + value + " to "  + topic);
+        System.out.println(JSONObject.toJSONString((LogTransactionMessage) value));
+        producer.send(new ProducerRecord<>(topic,  JSONObject.toJSONString(value)));
     }
 
 }

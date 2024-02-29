@@ -3,6 +3,7 @@ package info.jiaying.back_end.api.user;
 import info.jiaying.back_end.dto.CommonResponse;
 import info.jiaying.back_end.dto.UserLoginParams;
 import info.jiaying.back_end.dto.UserSignUpParams;
+import info.jiaying.back_end.exception.UsernameNotExistException;
 import info.jiaying.back_end.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,4 +24,6 @@ public class UserController {
         String token = userService.login(userLoginParams.getUsername(), userLoginParams.getPassword());
         return CommonResponse.success(token);
     }
+
+
 }

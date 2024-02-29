@@ -1,244 +1,193 @@
 package info.jiaying.log_transfer_hub.logparser;
 
+import info.jiaying.log_transfer_hub.logparser.domainknowledge.DomainKnowledgeManager;
+import info.jiaying.log_transfer_hub.logparser.domainknowledge.impl.TimeRelatedKnowledge;
+import info.jiaying.log_transfer_hub.logparser.tree.router.LengthRouter;
+import info.jiaying.log_transfer_hub.logparser.tree.router.WordRouter;
 import lombok.Data;
 
+import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.regex.Pattern;
+import java.util.function.Function;
 
 /**
  * This class contains the parsing logic for implementing the DRAIN algorithm.
- *
- * See original paper: http://jmzhu.logpai.com/pub/pjhe_icws2017.pdf
+ * See original paper: <a href="http://jmzhu.logpai.com/pub/pjhe_icws2017.pdf">link to paper</a>
  */
 public class DrainLogParser {
-
+    private final int MAX_DEPTH;
+    private final int MAX_CHILDREN;
+    private final float SIMILARITY_THRESHOLD;
     private static final String WILD_CARD = "<*>";
-    private static final Pattern numberPattern = Pattern.compile("\\d+");
-
     private static int count = 0;
 
-    private final List<Pattern> preProcessPatterns;
-    private final int maxDepth;
-    private final int maxChildren;
-    private final double similarityThreshold;
-    private final Map<Integer, TreeNode> root;
+    private final String ROUTER_PACKAGE_PATH = "info.jiaying.log_transfer_hub.logparser.tree.router.";
 
-    public DrainLogParser(List<Pattern> preProcessPatterns, int maxDepth, int maxChildren, double similarityThreshold) {
-        this.preProcessPatterns = Collections.unmodifiableList(preProcessPatterns);
-        this.maxDepth = maxDepth;
-        this.maxChildren = maxChildren;
-        this.similarityThreshold = similarityThreshold;
-        this.root = new HashMap<>();
+    private final DomainKnowledgeManager domainKnowledge = new DomainKnowledgeManager();
+
+    private final Node root;
+
+    private final RouterType[] routerTypeConf;
+
+    public enum RouterType {
+        LengthRouter,
+        WordRouter
+    }
+
+    public static void main(String[] args) {
+        DrainLogParser parser = new DrainLogParser(10, 10, 0.85F);
+        System.out.println(parser.parseLogLine("Dec  3 03:12:01 VM-4-2-centos kernel: device eth0 left promiscuous mode"));
+        System.out.println(parser.parseLogLine("Dec  3 03:12:01 VM-4-2-centos systemd: Started Session 316064 of user root"));
+        System.out.println(parser.parseLogLine("Feb 17 03:07:40 VM-4-2-centos sshd[8547]: pam_unix(sshd:auth): check pass; user unknown"));
+        System.out.println(parser.parseLogLine("Feb 17 03:11:00 VM-4-2-centos sshd[9505]: pam_unix(sshd:auth): check pass; user unknown"));
+    }
+
+    public DrainLogParser(int maxDepth, int maxChildren, float similarityThreshold) {
+        MAX_DEPTH = maxDepth;
+        MAX_CHILDREN = maxChildren;
+        SIMILARITY_THRESHOLD = similarityThreshold;
+        domainKnowledge.register(new TimeRelatedKnowledge());
+        routerTypeConf = new RouterType[maxDepth];
+        routerTypeConf[0] = RouterType.LengthRouter;
+        for (int i = 1; i < maxDepth; i++) {
+            routerTypeConf[i] = RouterType.WordRouter;
+        }
+        root = new Node(0, getRouterByType(routerTypeConf[0]));
+    }
+
+    public Function<String[], Integer> getRouterByType(RouterType type, Object... params) {
+        try {
+            Class<?> clazz = Class.forName(ROUTER_PACKAGE_PATH + type.name());
+            if (type == RouterType.WordRouter) {
+                Constructor<?> constructor = clazz.getConstructor(int.class);
+                return (WordRouter) constructor.newInstance((int) params[0]);
+            } else if (type == RouterType.LengthRouter) {
+                return (LengthRouter) clazz.getDeclaredConstructor().newInstance();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return null; // 不理解为什么这里要加上return
     }
 
     String[] preprocess(final String logLine) {
-        String[] tokens = logLine.strip().split(" ");
+        String[] tokens = logLine.strip().split(" +");
         String[] filteredTokens = new String[tokens.length];
         for (int i = 0; i < tokens.length; i++) {
-            filteredTokens[i] = matchesPattern(tokens[i]) ? WILD_CARD : tokens[i];
+            filteredTokens[i] = domainKnowledge.isIdentified(tokens[i]) ? WILD_CARD : tokens[i];
         }
         return filteredTokens;
     }
 
-    public LogGroup parseLogLine(final String logLine, final String logId) {
+    public int parseLogLine(final String logLine) {
         String[] logTokens = preprocess(logLine);
-        int intermediateNodes = maxDepth - 1;
-        TreeNode currentNode = this.root.get(logTokens.length);
-        for (int i = 0; i < logTokens.length && i < intermediateNodes && currentNode != null; i++) {
-            String token = containsNumbers(logTokens[i]) ? WILD_CARD : logTokens[i];
-            TreeNode child = currentNode.getChild(token);
-            if (child == null && !token.equals(WILD_CARD)) {
-                child = currentNode.getChild(WILD_CARD);
-            }
-            currentNode = child;
+        Node crtNode = root;
+        while (crtNode.next(logTokens) != null) {
+            crtNode = crtNode.next(logTokens);
         }
-        LogGroup foundLogGroup = null;
-        if (currentNode != null) {
-            // Get the best log group in the current node.
-            // If we find one that means that it passes the similarity threshold and is updated to account
-            // for the new log message
-            foundLogGroup = currentNode.getAndUpdateLogGroup(logTokens, logId);
-        }
-        // Need to update the tree if possible
-        if (foundLogGroup == null) {
-            foundLogGroup = addToTree(logTokens, logId);
-        }
-        return foundLogGroup;
+        return crtNode.getEventId(logTokens);
     }
 
-    public LogGroup addToTree(String[] parsedLogTokens, final String logId) {
-        TreeNode currentNode = this.root.get(parsedLogTokens.length);
-        if (currentNode == null) { // we are missing an entire sub tree. New log length found
-            if (this.root.size() > maxChildren) {
-                throw new IllegalArgumentException("Maximum number of children reached. Consider adjusting [max_children] or [similarity_threshold] params");
-            }
-            currentNode = new TreeNode(null, this.maxChildren, this.similarityThreshold);
-            this.root.put(parsedLogTokens.length, currentNode);
-        }
-        for (int i = 0; i < parsedLogTokens.length && i < maxDepth - 1; i++) {
-            String currentToken = containsNumbers(parsedLogTokens[i]) ? WILD_CARD : parsedLogTokens[i];
-            TreeNode child = currentNode.getChild(currentToken);
-            // We are missing a child node for the current token
-            if (child == null) {
-                child = new TreeNode(currentToken, maxChildren, similarityThreshold);
-                if(!currentNode.addChild(currentToken, child)) {
-                    throw new IllegalArgumentException("Maximum number of children reached. Consider adjusting [max_children] or [similarity_threshold] params");
-                }
-            }
-            currentNode = child;
-        }
-        LogGroup group = new LogGroup(count++, parsedLogTokens, logId);
-        currentNode.putNewLogGroup(group);
-        return group;
-    }
+    @Data
+    public class Node {
+        private int height;
+        private Map<Integer, Node> children = new HashMap<>();
+        private Function<String[], Integer> router;
+        private LogGroupManager logGroupManager;
 
-    private boolean matchesPattern(final String token) {
-        return preProcessPatterns.stream().anyMatch(pattern -> pattern.matcher(token).matches());
-    }
-
-    private static boolean containsNumbers(String token) {
-        return numberPattern.matcher(token).find();
-    }
-
-    public static class TreeNode {
-
-        private final Map<String, TreeNode> children;
-        private final int maxChildren;
-        private final double similarityThreshold;
-        private final String matchToken;
-        private final List<LogGroup> logGroups;
-
-        TreeNode(String matchToken, int maxChildren, double similarityThreshold) {
-            children = new HashMap<>();
-            this.maxChildren = maxChildren;
-            this.logGroups = new ArrayList<>();
-            this.similarityThreshold = similarityThreshold;
-            this.matchToken = matchToken;
+        Node(int height, Function<String[], Integer> router) {
+            this.height = height;
+            this.router = router;
         }
 
-        String getMatchToken() {
-            return matchToken;
-        }
-
-        boolean canAddChild() {
-            return this.children.size() <= maxChildren;
-        }
-
-        boolean addChild(String token, TreeNode node) {
-            if (children.size() >= maxChildren) {
-                return false;
-            }
-            children.put(token, node);
-            return true;
-        }
-
-        TreeNode getChild(String token) {
-            return children.get(token);
-        }
-
-        LogGroup getAndUpdateLogGroup(String[] logTokens, String logId) {
-            AbstractMap.SimpleEntry<LogGroup, Double> bestGroupAndSimilarity = getBestLogGroup(logTokens);
-            if (bestGroupAndSimilarity == null) {
+        public Node next(String[] tokens) {
+            if (height >= MAX_DEPTH - 1) {
                 return null;
             }
-            if (bestGroupAndSimilarity.getValue() >= similarityThreshold) {
-                bestGroupAndSimilarity.getKey().addLog(logTokens, logId);
-                return bestGroupAndSimilarity.getKey();
-            }
-            return null;
-        }
 
-        void putNewLogGroup(LogGroup group) {
-            logGroups.add(group);
-        }
-
-        private AbstractMap.SimpleEntry<LogGroup, Double> getBestLogGroup(String[] logTokens) {
-            if (logGroups.isEmpty()) {
+            Integer idx = router.apply(tokens);
+            // Negative index means a leaf node
+            if (idx < 0) {
                 return null;
             }
-            if (logGroups.size() == 1) {
-                return new AbstractMap.SimpleEntry<>(logGroups.get(0), logGroups.get(0).calculateSimilarity(logTokens).getKey());
+
+            // If idx exceeds the max children which means there is no enough node for this new feature
+            // , defaults to direct to the last node.
+            if (idx >= MAX_CHILDREN) {
+                return children.get(MAX_CHILDREN - 1);
             }
-            double maxSimilarity = 0.0;
-            int maxExactness = 0;
-            LogGroup bestGroup = null;
-            for(LogGroup logGroup : this.logGroups) {
-                AbstractMap.SimpleEntry<Double, Integer> groupSimilarity = logGroup.calculateSimilarity(logTokens);
-                if (groupSimilarity.getKey() > maxSimilarity) {
-                    maxSimilarity = groupSimilarity.getKey();
-                    maxExactness = groupSimilarity.getValue();
-                    bestGroup = logGroup;
-                } else if (groupSimilarity.getKey() == maxSimilarity && groupSimilarity.getValue() > maxExactness) {
-                    maxExactness = groupSimilarity.getValue();
+
+            if (!children.containsKey(idx)) {
+                // Create new node for the new feature
+                children.put(idx, new Node(height + 1, getRouterByType(routerTypeConf[height + 1], height + 1)));
+            }
+
+            return children.get(idx);
+        }
+
+        public int getEventId(String[] tokens) {
+            if (logGroupManager == null) {
+                logGroupManager = new LogGroupManager();
+            }
+            return logGroupManager.put(tokens);
+        }
+    }
+
+    public class LogGroupManager {
+        private final List<LogGroup> logGroups = new ArrayList<>();
+
+        public int put(String[] tokens) {
+            float local_max_threshold = 0F;
+            LogGroup matchedLogGroup = null;
+            for (LogGroup logGroup : logGroups) {
+                float currentSimilarity = logGroup.doCalculateSimilarity(tokens);
+                if (currentSimilarity >= SIMILARITY_THRESHOLD && currentSimilarity >= local_max_threshold) {
+                    local_max_threshold = currentSimilarity;
+                    matchedLogGroup = logGroup;
                 }
             }
-            return new AbstractMap.SimpleEntry<>(bestGroup, maxSimilarity);
+            if (matchedLogGroup == null) {
+                logGroups.add(new LogGroup(count++, tokens));
+                matchedLogGroup = logGroups.get(logGroups.size() - 1);
+            }
+            return matchedLogGroup.getEventId();
         }
     }
 
     @Data
     public static class LogGroup {
-        private  int eventId;
+        private int eventId;
         private String[] logEvent;
-        private final List<String> logIds = new ArrayList<>(1);
 
-        LogGroup(int eventId, String[] logTokens, String logId) {
+        LogGroup(int eventId, String[] logTokens) {
             this.eventId = eventId;
             this.logEvent = logTokens;
-            this.logIds.add(logId);
-        }
-
-        public String getLogEvent() {
-            StringBuilder stringBuilder = new StringBuilder(logEvent.length + logEvent.length - 1);
-            for (String token : logEvent) {
-                stringBuilder.append(token).append(" ");
-            }
-            return stringBuilder.toString();
-        }
-
-        public List<String> getLogIds() {
-            return Collections.unmodifiableList(logIds);
         }
 
         /**
          * We calculate how close the given logEvent is to the stored logEvent pattern.
-         *
+         * <p>
          * {@code "<*>"} indicates that the template has a wildcard match. But, if we also want to
          * return how "exact" a match is. Meaning, we consider exact matches (not from wildcards) to have a higher priority.
+         *
          * @param logEvent The previously parsed logEvent to calculate
          * @return A AbstractMap.SimpleEntry of the Similarity and how many exact token matches there were
          */
-        AbstractMap.SimpleEntry<Double, Integer> calculateSimilarity(String[] logEvent) {
-            assert logEvent.length == this.logEvent.length;
-            int eqSum = 0;
+
+        float doCalculateSimilarity(String[] logEvent) {
+//            int eqSum = 0;
             int exactness = 0;
-            for (int i = 0; i < logEvent.length; i++) {
+            for (int i = 0; i < logEvent.length && i < this.logEvent.length; i++) {
                 if (logEvent[i].equals(this.logEvent[i])) {
                     exactness++;
-                    eqSum++;
+//                    eqSum++;
                 }
-                else if (this.logEvent[i].equals(WILD_CARD)) {
-                    eqSum++;
-                }
+//                else if (this.logEvent[i].equals(WILD_CARD)) {
+//                    eqSum++;
+//                }
             }
-            return new AbstractMap.SimpleEntry<>((double)eqSum/logEvent.length, exactness);
+            return logEvent.length < this.logEvent.length? (float) exactness / logEvent.length: (float) exactness / this.logEvent.length;
         }
 
-        /**
-         * See: F. Step 5: Update Parse Tree
-         * This mutates the underlying log event so that unmatched tokens are adjusted to be wild cards (i.e. '<*>')
-         *
-         * @param logEvent event to add to the log group, this will update the stored pattern
-         * @param logId the id of the log to add
-         */
-        void addLog(String[] logEvent, String logId) {
-            assert logEvent.length == this.logEvent.length;
-            for (int i = 0; i < logEvent.length; i++) {
-                if (!logEvent[i].equals(this.logEvent[i])) {
-                    this.logEvent[i] = WILD_CARD;
-                }
-            }
-            this.logIds.add(logId);
-        }
     }
 }

@@ -14,4 +14,6 @@ public interface UserService {
     UserDetails getUser(String username);
 
     UserDetails loadUserByUsername(String username);
+
+    int getUserIdByName(String username);
 }

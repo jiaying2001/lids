@@ -3,7 +3,7 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/lids?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://jiaying.info:3305/lids?useUnicode=true&characterEncoding=utf-8
     username: root
     password: Hjy20011222.
 
@@ -11,3 +11,9 @@ jwt:
   tokenHeader: Authorization
   secret: securesecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecretsecuresecret
   tokenHead: 'Bearer '
+
+  # MyBatis mapper.xml路径配置
+  mybatis:
+    mapper-locations:
+      - classpath:info/jiaying/back_end/dao/*.xml
+      - classpath*:info/jiaying/back_end/mapper/*.xml

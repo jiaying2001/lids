@@ -18,10 +18,12 @@ public class CommonResponse<T> {
     }
 
     public static <T> CommonResponse<T> success() {
-        return new CommonResponse(1, "success", null);
+        return new CommonResponse(200, "success", null);
     }
 
     public static <T> CommonResponse<T> success(T date) {
-        return new CommonResponse<T>(1, "success", date);
+        return new CommonResponse<T>(200, "success", date);
     }
+
+    public static <T> CommonResponse<T> fail(long code, String msg) {return new CommonResponse<>(code, msg, null);}
 }
