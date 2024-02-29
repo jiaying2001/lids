@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+/src/main/resources/log/secure
+/src/main/resources/knowledge/test.txt
+/src/main/resources/knowledge/time_related.txt
