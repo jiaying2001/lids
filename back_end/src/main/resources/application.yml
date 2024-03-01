@@ -13,7 +13,11 @@ jwt:
   tokenHead: 'Bearer '
 
   # MyBatis mapper.xml路径配置
-  mybatis:
-    mapper-locations:
-      - classpath:info/jiaying/back_end/dao/*.xml
-      - classpath*:info/jiaying/back_end/mapper/*.xml
+mybatis:
+  mapper-locations:
+    - classpath:info/jiaying/back_end/dao/*.xml
+    - classpath*:info/jiaying/back_end/mapper/*.xml
+
+file:
+  upload: '/Users/jiayinghuang/Desktop/'
+  suffix: 'txt'
