@@ -3,6 +3,7 @@ package info.jiaying.http;
 import com.alibaba.fastjson2.JSONObject;
 import info.jiaying.constant.TaskUrl;
 import info.jiaying.dto.CommonResponse;
+import info.jiaying.dto.FileResponse;
 import info.jiaying.model.Task;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -18,15 +19,13 @@ public class ServerImpl implements ServerInterface {
     OkHttpClient client = new OkHttpClient();
 
     // get方法
-    public CommonResponse get(String url) {
-
+    public String get(String url) {
         Request request = new Request.Builder().url(url)
                 .addHeader("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyb290IiwiY3JlYXRlZCI6IjIwMjQtMDMtMDIgMTA6MDc6MDUifQ.xZk7gJBMO3gvQKPvbK6bIqdYimFEOZqkF6lb5qu-gA2TDZveFVfyDXHYPcKx1RBWql51JMuYgtN7CpgN4co3xg")
                 .get()
                 .build();
         try (Response response = client.newCall(request).execute()) {
-            String result = response.body().string();
-            return JSONObject.parseObject(result, CommonResponse.class);
+            return response.body().string();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -63,6 +62,21 @@ public class ServerImpl implements ServerInterface {
 
     }
 
+    @Override
+    public byte[] loadFileByFilename(String fileName) {
+        Map<String, String> params = new HashMap<>();
+        params.put("fileName", fileName);
+        String resp = get(TaskUrl.LOAD_FILE + getParamStr(params));
+        FileResponse fileResponse = JSONObject.parseObject(resp, FileResponse.class);
+        if (fileResponse.getCode() == 200) {
+            return fileResponse.getData();
+        } else {
+            log.error("Error lading the file from server");
+            return null;
+        }
+    }
+
+
     // 获取任务列表url
     @Override
     public List<Task> getTaskList(String taskType, int status, int limit) {
@@ -72,7 +86,7 @@ public class ServerImpl implements ServerInterface {
             put("limit", limit + "");
         }};
         String url = TaskUrl.IPORT + TaskUrl.HOLD_TASK + getParamStr(params);
-        CommonResponse resp = get(url);
+        CommonResponse resp = JSONObject.parseObject(get(url), CommonResponse.class);
         return resp.getData();
     }
 
@@ -90,7 +104,7 @@ public class ServerImpl implements ServerInterface {
     // 获取任务配置信息
     @Override
     public CommonResponse getTaskTypeCfgList() {
-       return get(TaskUrl.IPORT + TaskUrl.GET_CFG_LIST);
+       return JSONObject.parseObject(get(TaskUrl.IPORT + TaskUrl.GET_CFG_LIST), CommonResponse.class);
     }
 
 }

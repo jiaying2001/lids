@@ -7,6 +7,8 @@ import java.util.List;
 
 
 public interface ServerInterface {
+    byte[] loadFileByFilename(String fileName);
+
     List<Task> getTaskList(String taskType, int status, int limit);
 
     // 获取任务配置信息
