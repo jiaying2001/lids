@@ -386,7 +386,6 @@
   <select id="selectWithLimit" resultMap="BaseResultMap">
     select * from `task`
     where `task_type` = #{task_type} and
-          `task_stage` = #{task_stage} and
           `status` = #{status}
     limit #{limit}
   </select>
