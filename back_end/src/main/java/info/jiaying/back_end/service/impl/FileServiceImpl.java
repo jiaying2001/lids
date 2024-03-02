@@ -21,17 +21,8 @@ public class FileServiceImpl implements FileService {
     private String SUFFIX;
 
     @Override
-    public String save(MultipartFile file) {
-        String uuid = UUID.randomUUID().toString();
-        try (FileOutputStream f = new FileOutputStream(FILE_PATH + uuid + "." + SUFFIX)) {
-            System.out.println(FILE_PATH + uuid + "." + SUFFIX);
-            f.write(file.getBytes());
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return uuid;
+    public String save(MultipartFile file) throws IOException {
+        return save(file.getBytes());
     }
 
     @Override
@@ -43,4 +34,16 @@ public class FileServiceImpl implements FileService {
         }
     }
 
+    @Override
+    public String save(byte[] bytes) {
+        String uuid = UUID.randomUUID().toString();
+        try (FileOutputStream f = new FileOutputStream(FILE_PATH + uuid + "." + SUFFIX)) {
+            f.write(bytes);
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return uuid;
+    }
 }

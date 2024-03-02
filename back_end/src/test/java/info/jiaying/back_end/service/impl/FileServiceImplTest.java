@@ -36,7 +36,7 @@ public class FileServiceImplTest {
         }
 
         @Test
-        public void shouldSaveToCorrectFilePath() {
+        public void shouldSaveToCorrectFilePath() throws IOException {
             underTest.save(file);
         }
     }
