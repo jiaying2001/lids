@@ -17,8 +17,13 @@ public class FileController {
     @Autowired
     FileService fileService;
 
-    @PostMapping("upload")
+    @PostMapping("/upload")
     public CommonResponse upload(@RequestParam("file") MultipartFile file) throws IOException {
         return CommonResponse.success(fileService.save(file));
+    }
+
+    @GetMapping
+    public CommonResponse get(@RequestParam("fileName") String fileName) {
+        return CommonResponse.success(fileService.get(fileName));
     }
 }

@@ -2,10 +2,7 @@ package info.jiaying.back_end.service.impl;
 
 import cn.hutool.core.lang.UUID;
 import info.jiaying.back_end.service.FileService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -13,7 +10,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Arrays;
 
 @Service
 public class FileServiceImpl implements FileService {
@@ -39,13 +35,12 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public MultipartFile get(String fileName){
+    public byte[] get(String fileName){
         try (FileInputStream file = new FileInputStream(FILE_PATH + fileName + "." + SUFFIX)){
-            System.out.println(Arrays.toString(file.readAllBytes()));
+           return file.readAllBytes();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
 
 }
