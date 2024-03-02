@@ -46,8 +46,8 @@ public class TaskController {
     }
 
     @GetMapping("/tasks")
-    public CommonResponse getTasks(@RequestParam("task_type") String taskType, @RequestParam("task_stage") String taskStage, @RequestParam("status") int status, @RequestParam("limit") int limit){
-        return CommonResponse.success(taskService.getTasks(taskType, taskStage, status, limit));
+    public CommonResponse getTasks(@RequestParam("task_type") String taskType, @RequestParam("status") int status, @RequestParam("limit") int limit){
+        return CommonResponse.success(taskService.getTasks(taskType, status, limit));
     }
 
     @PostMapping("/tasks")

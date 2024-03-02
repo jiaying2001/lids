@@ -51,8 +51,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<Task> getTasks(String taskType, String taskStage, int status, int limit) {
-        return taskMapper.selectWithLimit(taskType, taskStage, status, limit);
+    public List<Task> getTasks(String taskType, int status, int limit) {
+        return taskMapper.selectWithLimit(taskType, status, limit);
     }
 
     @Override

@@ -28,5 +28,5 @@ public interface TaskMapper {
 
     int updateByPrimaryKey(Task record);
 
-    List<Task> selectWithLimit(@Param("task_type") String taskType, @Param("task_stage") String taskStage, @Param("status") int status, @Param("limit") int limit);
+    List<Task> selectWithLimit(@Param("task_type") String taskType, @Param("status") int status, @Param("limit") int limit);
 }
