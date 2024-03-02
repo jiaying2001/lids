@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="info.jiaying.back_end.mapper.TaskMetaCfgMapper">
+  <resultMap id="BaseResultMap" type="info.jiaying.back_end.model.TaskMetaCfg">
+    <id column="task_type" jdbcType="VARCHAR" property="taskType" />
+    <result column="schedule_limit" jdbcType="INTEGER" property="scheduleLimit" />
+    <result column="schedule_interval" jdbcType="INTEGER" property="scheduleInterval" />
+    <result column="max_processing_time" jdbcType="INTEGER" property="maxProcessingTime" />
+    <result column="max_retry_num" jdbcType="INTEGER" property="maxRetryNum" />
+    <result column="retry_interval" jdbcType="INTEGER" property="retryInterval" />
+    <result column="create_time" jdbcType="BIGINT" property="createTime" />
+    <result column="modify_time" jdbcType="BIGINT" property="modifyTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    task_type, schedule_limit, schedule_interval, max_processing_time, max_retry_num, 
+    retry_interval, create_time, modify_time
+  </sql>
+  <select id="selectByExample" parameterType="info.jiaying.back_end.model.TaskMetaCfgExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from task_meta_cfg
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from task_meta_cfg
+    where task_type = #{taskType,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from task_meta_cfg
+    where task_type = #{taskType,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="info.jiaying.back_end.model.TaskMetaCfgExample">
+    delete from task_meta_cfg
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="info.jiaying.back_end.model.TaskMetaCfg">
+    <selectKey keyProperty="taskType" order="AFTER" resultType="java.lang.String">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into task_meta_cfg (schedule_limit, schedule_interval, 
+      max_processing_time, max_retry_num, retry_interval, 
+      create_time, modify_time)
+    values (#{scheduleLimit,jdbcType=INTEGER}, #{scheduleInterval,jdbcType=INTEGER}, 
+      #{maxProcessingTime,jdbcType=INTEGER}, #{maxRetryNum,jdbcType=INTEGER}, #{retryInterval,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=BIGINT}, #{modifyTime,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="info.jiaying.back_end.model.TaskMetaCfg">
+    <selectKey keyProperty="taskType" order="AFTER" resultType="java.lang.String">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into task_meta_cfg
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="scheduleLimit != null">
+        schedule_limit,
+      </if>
+      <if test="scheduleInterval != null">
+        schedule_interval,
+      </if>
+      <if test="maxProcessingTime != null">
+        max_processing_time,
+      </if>
+      <if test="maxRetryNum != null">
+        max_retry_num,
+      </if>
+      <if test="retryInterval != null">
+        retry_interval,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="modifyTime != null">
+        modify_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="scheduleLimit != null">
+        #{scheduleLimit,jdbcType=INTEGER},
+      </if>
+      <if test="scheduleInterval != null">
+        #{scheduleInterval,jdbcType=INTEGER},
+      </if>
+      <if test="maxProcessingTime != null">
+        #{maxProcessingTime,jdbcType=INTEGER},
+      </if>
+      <if test="maxRetryNum != null">
+        #{maxRetryNum,jdbcType=INTEGER},
+      </if>
+      <if test="retryInterval != null">
+        #{retryInterval,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="modifyTime != null">
+        #{modifyTime,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="info.jiaying.back_end.model.TaskMetaCfgExample" resultType="java.lang.Long">
+    select count(*) from task_meta_cfg
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update task_meta_cfg
+    <set>
+      <if test="record.taskType != null">
+        task_type = #{record.taskType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.scheduleLimit != null">
+        schedule_limit = #{record.scheduleLimit,jdbcType=INTEGER},
+      </if>
+      <if test="record.scheduleInterval != null">
+        schedule_interval = #{record.scheduleInterval,jdbcType=INTEGER},
+      </if>
+      <if test="record.maxProcessingTime != null">
+        max_processing_time = #{record.maxProcessingTime,jdbcType=INTEGER},
+      </if>
+      <if test="record.maxRetryNum != null">
+        max_retry_num = #{record.maxRetryNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.retryInterval != null">
+        retry_interval = #{record.retryInterval,jdbcType=INTEGER},
+      </if>
+      <if test="record.createTime != null">
+        create_time = #{record.createTime,jdbcType=BIGINT},
+      </if>
+      <if test="record.modifyTime != null">
+        modify_time = #{record.modifyTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update task_meta_cfg
+    set task_type = #{record.taskType,jdbcType=VARCHAR},
+      schedule_limit = #{record.scheduleLimit,jdbcType=INTEGER},
+      schedule_interval = #{record.scheduleInterval,jdbcType=INTEGER},
+      max_processing_time = #{record.maxProcessingTime,jdbcType=INTEGER},
+      max_retry_num = #{record.maxRetryNum,jdbcType=INTEGER},
+      retry_interval = #{record.retryInterval,jdbcType=INTEGER},
+      create_time = #{record.createTime,jdbcType=BIGINT},
+      modify_time = #{record.modifyTime,jdbcType=BIGINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="info.jiaying.back_end.model.TaskMetaCfg">
+    update task_meta_cfg
+    <set>
+      <if test="scheduleLimit != null">
+        schedule_limit = #{scheduleLimit,jdbcType=INTEGER},
+      </if>
+      <if test="scheduleInterval != null">
+        schedule_interval = #{scheduleInterval,jdbcType=INTEGER},
+      </if>
+      <if test="maxProcessingTime != null">
+        max_processing_time = #{maxProcessingTime,jdbcType=INTEGER},
+      </if>
+      <if test="maxRetryNum != null">
+        max_retry_num = #{maxRetryNum,jdbcType=INTEGER},
+      </if>
+      <if test="retryInterval != null">
+        retry_interval = #{retryInterval,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=BIGINT},
+      </if>
+      <if test="modifyTime != null">
+        modify_time = #{modifyTime,jdbcType=BIGINT},
+      </if>
+    </set>
+    where task_type = #{taskType,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="info.jiaying.back_end.model.TaskMetaCfg">
+    update task_meta_cfg
+    set schedule_limit = #{scheduleLimit,jdbcType=INTEGER},
+      schedule_interval = #{scheduleInterval,jdbcType=INTEGER},
+      max_processing_time = #{maxProcessingTime,jdbcType=INTEGER},
+      max_retry_num = #{maxRetryNum,jdbcType=INTEGER},
+      retry_interval = #{retryInterval,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=BIGINT},
+      modify_time = #{modifyTime,jdbcType=BIGINT}
+    where task_type = #{taskType,jdbcType=VARCHAR}
+  </update>
+</mapper>
