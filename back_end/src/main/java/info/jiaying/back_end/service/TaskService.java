@@ -14,4 +14,6 @@ public interface TaskService {
     void updateTasks(List<Task> tasks);
 
     List<Task> getTasks(String taskType, String taskStage, int status, int limit);
+
+    void update(Task task);
 }
