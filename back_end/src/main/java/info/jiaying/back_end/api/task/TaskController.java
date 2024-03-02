@@ -56,7 +56,7 @@ public class TaskController {
         return CommonResponse.success();
     }
 
-    @PostMapping("/task/update")
+    @PostMapping("/update")
     public CommonResponse update(@RequestBody Task task) {
         taskService.update(task);
         return CommonResponse.success();

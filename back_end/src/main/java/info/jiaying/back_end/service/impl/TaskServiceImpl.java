@@ -46,7 +46,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void updateTasks(List<Task> tasks) {
         for (Task task: tasks) {
-            taskMapper.updateByPrimaryKey(task);
+            taskMapper.updateByPrimaryKeySelective(task);
         }
     }
 

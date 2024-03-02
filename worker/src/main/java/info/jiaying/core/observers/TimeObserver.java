@@ -1,17 +1,26 @@
 package info.jiaying.core.observers;
 
+import cn.hutool.core.util.StrUtil;
+import com.alibaba.fastjson2.JSONObject;
 import info.jiaying.core.AnnType;
 import info.jiaying.core.ObserverFunction;
+import info.jiaying.dto.CommonResponse;
 import info.jiaying.enums.EventType;
+import info.jiaying.enums.TaskStatus;
 import info.jiaying.http.ServerImpl;
 import info.jiaying.http.ServerInterface;
+import info.jiaying.model.Task;
+import info.jiaying.model.TaskContext;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 观察者
  */
+@Slf4j
 public class TimeObserver implements ObserverFunction {
     private String packageName;
     private Long beginTime;
-    ServerInterface taskFlower = new ServerImpl();
+    ServerInterface server = new ServerImpl();
 
     // 获取任务时改变任务状态
     @Override
@@ -29,7 +38,7 @@ public class TimeObserver implements ObserverFunction {
     // 执行任务前做的动作，目前是简单打印
     @Override
     @AnnType(observerType = EventType.onExecute)
-    public void onExecute() {
+    public void onExecute(Task task) {
         System.out.println("开始执行。");
     }
 
@@ -49,8 +58,16 @@ public class TimeObserver implements ObserverFunction {
     // 任务执行完成做的动作
     @Override
     @AnnType(observerType = EventType.onFinish)
-    public void onFinish(){
-        System.out.println("执行完毕！");
+    public void onFinish(Task task, TaskContext taskContext){
+        if (StrUtil.isNullOrUndefined(taskContext.getNextStage())) { // Detect reaching the end stage
+            log.info("Task id " + task.getTaskId() + " done");
+            task.setStatus(TaskStatus.SUCCESS.getStatus());
+        } else {
+            log.info("Task id " + task.getTaskId() + " succeeded in a stage");
+            task.setStatus(TaskStatus.PENDING.getStatus());
+            task.setTaskContext(JSONObject.toJSONString(taskContext));
+        }
+        server.setTask(task);
     }
 
     // 获取待定使用

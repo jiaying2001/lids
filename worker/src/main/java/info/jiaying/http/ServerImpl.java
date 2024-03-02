@@ -3,13 +3,17 @@ package info.jiaying.http;
 import com.alibaba.fastjson2.JSONObject;
 import info.jiaying.constant.TaskUrl;
 import info.jiaying.dto.CommonResponse;
+import info.jiaying.model.Task;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // 利用OKhttp发起端口请求
+@Slf4j
 public class ServerImpl implements ServerInterface {
     OkHttpClient client = new OkHttpClient();
 
@@ -17,6 +21,7 @@ public class ServerImpl implements ServerInterface {
     public CommonResponse get(String url) {
 
         Request request = new Request.Builder().url(url)
+                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyb290IiwiY3JlYXRlZCI6IjIwMjQtMDMtMDIgMTA6MDc6MDUifQ.xZk7gJBMO3gvQKPvbK6bIqdYimFEOZqkF6lb5qu-gA2TDZveFVfyDXHYPcKx1RBWql51JMuYgtN7CpgN4co3xg")
                 .get()
                 .build();
         try (Response response = client.newCall(request).execute()) {
@@ -42,6 +47,7 @@ public class ServerImpl implements ServerInterface {
     public <E> CommonResponse post(String url, E body) {
         Request request = new Request.Builder()
                 .addHeader("content-type", "application/json")
+                .addHeader("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyb290IiwiY3JlYXRlZCI6IjIwMjQtMDMtMDIgMTA6MDc6MDUifQ.xZk7gJBMO3gvQKPvbK6bIqdYimFEOZqkF6lb5qu-gA2TDZveFVfyDXHYPcKx1RBWql51JMuYgtN7CpgN4co3xg")
                 .url(TaskUrl.IPORT + url)
                 .post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), JSONObject.toJSONString(body)))
                 .build();
@@ -59,20 +65,26 @@ public class ServerImpl implements ServerInterface {
 
     // 获取任务列表url
     @Override
-    public CommonResponse getTaskList(String taskType, int status, int limit) {
+    public List<Task> getTaskList(String taskType, int status, int limit) {
         Map<String, String> params = new HashMap<String, String>() {{
             put("task_type", taskType);
             put("status", status + "");
             put("limit", limit + "");
         }};
         String url = TaskUrl.IPORT + TaskUrl.HOLD_TASK + getParamStr(params);
-        return get(url);
+        CommonResponse resp = get(url);
+        return resp.getData();
     }
 
     // 调用更改任务信息接口
     @Override
-    public CommonResponse setTask( ) {
-        return post(TaskUrl.SET_TASK, null);
+    public void setTask(Task task) {
+        CommonResponse resp = post(TaskUrl.SET_TASK, task);
+        if (resp.getCode() == 200) {
+            log.info("Set task successfully");
+        } else {
+            log.error("Error setting task: " + resp.getMsg());
+        }
     }
 
     // 获取任务配置信息

@@ -7,13 +7,13 @@ import lombok.Setter;
 
 public enum TaskStatus {
         // 待执行
-        PENDING(0x01),
+        PENDING(0x00),
         // 执行中
-        EXECUTING(0x02),
+        EXECUTING(0x01),
         // 执行成功
-        SUCCESS(0x04),
+        SUCCESS(0x02),
         // 执行失败
-        FAIL(0x08);
+        FAIL(0x03);
 
         private TaskStatus(int status) {
             this.status = status;
