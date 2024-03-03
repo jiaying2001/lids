@@ -10,5 +10,6 @@ public class TaskUrl {
     public final static String GET_CFG_LIST = "/task_schedule_cfg/list";
     public final static String GET_USER_TASK_LIST = "/task/user_task_list";
     public final static String CREATE_TASK_CFG = "/task_schedule_cfg/task_configuration";
-    public final static String LOAD_FILE = "/api/file/";
+    public final static String LOAD_FILE = "/api/file";
+    public final static String UPLOAD_FILE = "/api/file";
 }

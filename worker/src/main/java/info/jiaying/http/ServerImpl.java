@@ -1,13 +1,18 @@
 package info.jiaying.http;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONReader;
 import info.jiaying.constant.TaskUrl;
 import info.jiaying.dto.CommonResponse;
+import info.jiaying.dto.FileNameResponse;
 import info.jiaying.dto.FileResponse;
+import info.jiaying.enums.NetworkStatus;
 import info.jiaying.model.Task;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -43,18 +48,17 @@ public class ServerImpl implements ServerInterface {
     }
 
     // post请求
-    public <E> CommonResponse post(String url, E body) {
+    public String post(String url, String body) {
         Request request = new Request.Builder()
                 .addHeader("content-type", "application/json")
                 .addHeader("Authorization", "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyb290IiwiY3JlYXRlZCI6IjIwMjQtMDMtMDIgMTA6MDc6MDUifQ.xZk7gJBMO3gvQKPvbK6bIqdYimFEOZqkF6lb5qu-gA2TDZveFVfyDXHYPcKx1RBWql51JMuYgtN7CpgN4co3xg")
                 .url(TaskUrl.IPORT + url)
-                .post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), JSONObject.toJSONString(body)))
+                .post(RequestBody.create(MediaType.parse("application/json; charset=utf-8"), body))
                 .build();
 
         String result;
         try {
-            result = client.newCall(request).execute().body().string();
-            return JSONObject.parseObject(result, CommonResponse.class);
+            return result = client.newCall(request).execute().body().string();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -66,8 +70,8 @@ public class ServerImpl implements ServerInterface {
     public byte[] loadFileByFilename(String fileName) {
         Map<String, String> params = new HashMap<>();
         params.put("fileName", fileName);
-        String resp = get(TaskUrl.LOAD_FILE + getParamStr(params));
-        FileResponse fileResponse = JSONObject.parseObject(resp, FileResponse.class);
+        String resp = get( TaskUrl.IPORT +  TaskUrl.LOAD_FILE + getParamStr(params));
+        FileResponse fileResponse = JSONObject.parseObject(resp, FileResponse.class, JSONReader.Feature.Base64StringAsByteArray);
         if (fileResponse.getCode() == 200) {
             return fileResponse.getData();
         } else {
@@ -93,7 +97,7 @@ public class ServerImpl implements ServerInterface {
     // 调用更改任务信息接口
     @Override
     public void setTask(Task task) {
-        CommonResponse resp = post(TaskUrl.SET_TASK, task);
+        CommonResponse resp = JSONObject.parseObject(post(TaskUrl.SET_TASK, JSONObject.toJSONString(task)), CommonResponse.class);
         if (resp.getCode() == 200) {
             log.info("Set task successfully");
         } else {
@@ -105,6 +109,16 @@ public class ServerImpl implements ServerInterface {
     @Override
     public CommonResponse getTaskTypeCfgList() {
        return JSONObject.parseObject(get(TaskUrl.IPORT + TaskUrl.GET_CFG_LIST), CommonResponse.class);
+    }
+
+    @Override
+    public String uploadFile(String file) {
+        FileNameResponse resp = JSONObject.parseObject(post(TaskUrl.UPLOAD_FILE, file), FileNameResponse.class);
+        if (resp.getCode() == NetworkStatus.OK.getCode()) {
+            return resp.getData();
+        } else {
+            return "";
+        }
     }
 
 }
