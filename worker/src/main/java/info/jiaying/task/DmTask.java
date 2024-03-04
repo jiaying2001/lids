@@ -57,9 +57,8 @@ public class DmTask {
     public static void main(String[] args) {
         DmTask t = new DmTask();
         DmConfig cfg = new DmConfig();
-        cfg.setOs("darwin");
+        cfg.setOs("linux");
         cfg.setAppName("sshd");
-        cfg.setType("dm");
         cfg.setAccessType("public");
         t.deploy("test", cfg);
     }

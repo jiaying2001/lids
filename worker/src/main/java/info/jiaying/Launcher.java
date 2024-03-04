@@ -1,5 +1,6 @@
 package info.jiaying;
 
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONReader;
 import info.jiaying.config.LauncherConfig;
@@ -17,9 +18,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
-
-import static org.apache.logging.log4j.message.MapMessage.MapFormat.JSON;
 
 /**
  * Hello world!
@@ -76,8 +74,10 @@ public class Launcher
             observerManager.wakeupObserver(EventType.onExecute, task);
             Class<?> clazz = Class.forName(TASK_PACKAGE_NAME + "." + task.getTaskType()); // Get class object of the task type
             TaskContext tc = JSONObject.parseObject(task.getTaskContext(), TaskContext.class, JSONReader.Feature.SupportClassForName);
+            resolveParams(tc);
             Method method = getMethodFromNameAndParameters(clazz, tc);
-            TaskContext rtc = (TaskContext) method.invoke(clazz.getConstructor().newInstance(), tc.getParams());
+            Constructor<?> c =  clazz.getConstructor();
+            TaskContext rtc = (TaskContext) method.invoke(c.newInstance(), tc.getParams());
             observerManager.wakeupObserver(EventType.onFinish, task, rtc);
         } catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
@@ -88,7 +88,17 @@ public class Launcher
         }
     }
 
-    private Method getMethodFromNameAndParameters(Class<?> task,TaskContext tc) {
+    public void resolveParams(TaskContext tc) {
+        Class<?>[] c = tc.getClazz();
+        Object[] o = tc.getParams();
+        for (int i = 0; i < tc.getParams().length; i++) {
+            if (o[i] instanceof String && JSONUtil.isTypeJSON((String) o[i])) {
+                o[i] = (Object) JSONObject.parseObject((String) o[i], c[i]);
+            }
+        }
+    }
+
+    private Method getMethodFromNameAndParameters(Class<?> task,TaskContext tc) throws NoSuchMethodException {
         for (Method method: task.getMethods()) {
             if (method.getName().equals(tc.getNextStage()) && method.getParameterTypes().length == tc.getClazz().length && tc.getParams().length == method.getParameterCount()) {
                 return method;
@@ -108,6 +118,8 @@ public class Launcher
     public static void main( String[] args )
     {
         Launcher l = new Launcher();
-        l.run();
+//        l.run();
+        List<Task> tasks =l. pullTasks();
+        l.execute(tasks);
     }
 }

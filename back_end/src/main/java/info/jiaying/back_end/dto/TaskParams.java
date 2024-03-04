@@ -6,13 +6,13 @@ import lombok.Data;
 public class TaskParams {
     private String user_id;
 
-    private String task_type;
+    private String task_type="";
 
-    private String task_stage;
+    private String task_stage="";
 
-    private String schedule_log;
+    private String schedule_log="";
 
-    private String task_context;
+    private String task_context="";
 
-    private String file_name;
+    private String file_name="";
 }

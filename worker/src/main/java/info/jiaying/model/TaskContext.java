@@ -1,5 +1,4 @@
 package info.jiaying.model;
-
 import info.jiaying.utils.clazz.ClassUtils;
 import lombok.Builder;
 import lombok.Data;
