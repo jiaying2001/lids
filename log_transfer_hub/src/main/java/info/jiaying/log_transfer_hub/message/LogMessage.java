@@ -13,6 +13,7 @@ public class LogMessage {
     @Data
     public static class Header{
         private String traceId;
+        private int userId;
         private String authToken;
         private String os;
         private String appName;
@@ -21,6 +22,7 @@ public class LogMessage {
         private FeatureExtraction fe;
         // Name convention: os_appName_type
         private String topic;
+        private int count;
     }
 
     public enum FeatureExtraction {

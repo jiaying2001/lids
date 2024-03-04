@@ -2,6 +2,7 @@ package info.jiaying.log_transfer_hub;
 
 import com.alibaba.fastjson2.JSONObject;
 import info.jiaying.log_transfer_hub.logparser.PIDLogParser;
+import info.jiaying.log_transfer_hub.logreceiver.TraceReceiver;
 import info.jiaying.log_transfer_hub.logreceiver.TransactionLogReceiver;
 import info.jiaying.log_transfer_hub.message.LogMessage;
 import info.jiaying.log_transfer_hub.util.kafka.client.KafkaClient;
@@ -18,6 +19,7 @@ public class Launcher {
     public Launcher() {
 //        logDispatcher.addReceiver(new LogReceiver());
         logDispatcher.addReceiver(new TransactionLogReceiver());
+        logDispatcher.addReceiver(new TraceReceiver());
     }
 
     public void launch() throws InvocationTargetException, IllegalAccessException, InterruptedException {
@@ -27,6 +29,7 @@ public class Launcher {
                LogMessage logMessage = JSONObject.parseObject(msg, LogMessage.class);
                logMessage.getHeader().setTopic(logMessage.getHeader().getOs() + "_" + logMessage.getHeader().getAppName() + "_public");
                logDispatcher.dispatch(LogEvent.ONRECEIVE, logMessage);
+                logDispatcher.dispatch(LogEvent.ONFINISH, (Object) null);
             }
             Thread.sleep(1000);
         }

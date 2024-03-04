@@ -61,7 +61,19 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
-<!--		&lt;!&ndash; https://mvnrepository.com/artifact/junit/junit &ndash;&gt;-->
+		<dependency>
+			<groupId>info.jiaying</groupId>
+			<artifactId>Commons</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>info.jiaying</groupId>
+			<artifactId>Commons</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>compile</scope>
+		</dependency>
+		<!--		&lt;!&ndash; https://mvnrepository.com/artifact/junit/junit &ndash;&gt;-->
 <!--		<dependency>-->
 <!--			<groupId>junit</groupId>-->
 <!--			<artifactId>junit</artifactId>-->

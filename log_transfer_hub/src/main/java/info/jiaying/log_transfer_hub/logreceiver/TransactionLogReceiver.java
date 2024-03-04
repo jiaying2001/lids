@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import info.jiaying.log_transfer_hub.logparser.PIDLogParser;
 import info.jiaying.log_transfer_hub.message.LogMessage;
 import info.jiaying.log_transfer_hub.util.kafka.client.KafkaClient;
+import info.jiaying.message.TrackHeadNodeLog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,5 +34,10 @@ public class TransactionLogReceiver implements Observer{
            msg.getBody().setContent(JSONObject.toJSONString(logGroup));
             KafkaClient.send(topic, JSONObject.toJSONString(msg));
         }
+    }
+
+    @Override
+    public void ONFINISH(TrackHeadNodeLog msg) {
+
     }
 }
