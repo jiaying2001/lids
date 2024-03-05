@@ -4,7 +4,6 @@ import cn.hutool.core.date.DateUnit;
 import info.jiaying.log_transfer_hub.message.LogMessage;
 import info.jiaying.log_transfer_hub.datatransformer.SessionWindow;
 import info.jiaying.log_transfer_hub.logparser.DrainLogParser;
-import info.jiaying.message.TrackHeadNodeLog;
 
 public class LogReceiver implements Observer{
     private final DrainLogParser parser = new DrainLogParser(5, 100, 0.5F);
@@ -30,7 +29,7 @@ public class LogReceiver implements Observer{
     }
 
     @Override
-    public void ONFINISH(TrackHeadNodeLog l) {
+    public void ONFINISH(LogMessage l) {
 
     }
 

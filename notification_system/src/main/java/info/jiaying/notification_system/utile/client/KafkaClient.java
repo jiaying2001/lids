@@ -1,7 +1,6 @@
 package info.jiaying.notification_system.utile.client;
 
 import com.alibaba.fastjson2.JSONObject;
-import info.jiaying.log_transfer_hub.message.LogTransactionMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -22,7 +21,7 @@ public class KafkaClient {
         Properties props = new Properties();
 //        props.put("bootstrap.servers", "124.221.34.29:9092");
         props.put("bootstrap.servers", "jiaying.info:9092");
-        props.put("group.id", "n1");
+        props.put("group.id", "n3-");
         props.put("enable.auto.commit", "true");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
@@ -65,7 +64,6 @@ public class KafkaClient {
 
     static public void send(String topic, Object value) {
         log.info("Sent " + value + " to "  + topic);
-        System.out.println(JSONObject.toJSONString((LogTransactionMessage) value));
         producer.send(new ProducerRecord<>(topic,  JSONObject.toJSONString(value)));
     }
 

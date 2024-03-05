@@ -22,7 +22,6 @@ public class Launcher {
             String msg = KafkaClient.get();
             if (msg != null) {
                 LogMessage logMessage = JSONObject.parseObject(msg, LogMessage.class);
-                System.out.println(logMessage); // 消费消息
                 logDispatcher.dispatch(LogEvent.ONRECEIVE, logMessage);
             }
             Thread.sleep(1000);

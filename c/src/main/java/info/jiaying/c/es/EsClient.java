@@ -1,7 +1,7 @@
-package info.jiaying.es;
-
-
+package info.jiaying.c.es;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.cat.IndicesRequest;
+import co.elastic.clients.elasticsearch.core.ExistsRequest;
 import co.elastic.clients.elasticsearch.core.GetResponse;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
@@ -16,9 +16,9 @@ import java.io.IOException;
 @Slf4j
 public class EsClient {
     // URL and API key
-    static String serverUrl = "http://localhost:9200";
-     // Create the low-level client
-     static private final RestClient restClient = RestClient
+    static String serverUrl = "http://jiaying.info:9200";
+    // Create the low-level client
+    static private final RestClient restClient = RestClient
             .builder(HttpHost.create(serverUrl))
             .build();
     static ElasticsearchTransport transport = new RestClientTransport(
@@ -39,9 +39,6 @@ public class EsClient {
     }
 
     public static void indexDoc(String idx, String id, Object o) throws IOException {
-        if (!existIdx(idx)) {
-            createIdx(idx);
-        }
         IndexResponse resp = esClient.index(i -> i
                 .index(String.valueOf(idx))
                 .id(id)
@@ -49,14 +46,10 @@ public class EsClient {
         );
     }
 
-    public static boolean existIdx(String idx) throws IOException {
-         return esClient.exists(b -> b.index(idx)).value();
-    }
-
     public static void getDoc(String idx, String id, Class<?> clazz) throws IOException {
         GetResponse<?> resp = resp = esClient.get(g -> g
-                .index(idx)
-                .id(id),
+                        .index(idx)
+                        .id(id),
                 clazz
         );
         if (resp.found()) {
@@ -66,6 +59,6 @@ public class EsClient {
     }
 
     public static void main(String[] args) throws IOException {
-        EsClient.createIdx("2");
     }
+
 }

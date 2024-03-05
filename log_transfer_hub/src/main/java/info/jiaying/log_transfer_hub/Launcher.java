@@ -29,7 +29,7 @@ public class Launcher {
                LogMessage logMessage = JSONObject.parseObject(msg, LogMessage.class);
                logMessage.getHeader().setTopic(logMessage.getHeader().getOs() + "_" + logMessage.getHeader().getAppName() + "_public");
                logDispatcher.dispatch(LogEvent.ONRECEIVE, logMessage);
-                logDispatcher.dispatch(LogEvent.ONFINISH, (Object) null);
+                logDispatcher.dispatch(LogEvent.ONFINISH, logMessage);
             }
             Thread.sleep(1000);
         }

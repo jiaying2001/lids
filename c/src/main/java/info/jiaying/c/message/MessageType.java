@@ -1,4 +1,4 @@
-package info.jiaying.message;
+package info.jiaying.c.message;
 
 import lombok.Getter;
 

@@ -1,11 +1,11 @@
 package info.jiaying.log_transfer_hub.logreceiver;
 
 import cn.hutool.core.bean.BeanUtil;
-import info.jiaying.es.EsClient;
+import info.jiaying.c.es.EsClient;
+import info.jiaying.c.message.MessageType;
+import info.jiaying.c.message.TrackHeadNodeLog;
+import info.jiaying.c.message.TrackNodeLog;
 import info.jiaying.log_transfer_hub.message.LogMessage;
-import info.jiaying.message.MessageType;
-import info.jiaying.message.TrackHeadNodeLog;
-import info.jiaying.message.TrackNodeLog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -27,17 +27,23 @@ public class TraceReceiver implements Observer{
                 .build();
         singleStore = log1;
         try {
-            log.info("Sending {} to ES", log1);
-            EsClient.indexDoc(log1.getUser_id(), log1.getTrace_id() + "_" + log1.getCount(), log1);
+            log.info("Sending {} to ES", log1.getTrace_id());
+            EsClient.indexDoc(log1.getUser_id(), log1.getTrace_id() + "_" + log1.getCount() + "_" + log1.getType(), log1);
         } catch (IOException e) {
             log.error("Error sending to elasticsearch");
         }
     }
 
     @Override
-    public void ONFINISH(TrackHeadNodeLog l) {
+    public void ONFINISH(LogMessage l) {
         TrackNodeLog nl = TrackNodeLog.builder().end_time(System.currentTimeMillis()).build();
         BeanUtil.copyProperties(singleStore, nl);
         nl.setType(MessageType.NODE.getCode());
+        try {
+            log.info("Sending {} to ES", nl.getTrace_id());
+            EsClient.indexDoc(nl.getUser_id(), nl.getTrace_id() + "_" + nl.getCount()+ "_" + nl.getType(), nl);
+        } catch (IOException e) {
+            log.error("Error sending to elasticsearch");
+        }
     }
 }
