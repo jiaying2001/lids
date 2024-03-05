@@ -44,11 +44,11 @@
 <!--        <table tableName="user_role">-->
 <!--            <generatedKey column="user_role_id" sqlStatement="MySql" identity="true"/>-->
 <!--        </table>-->
-        <table tableName="task">
-            <generatedKey column="task_id" sqlStatement="MySql" identity="true"/>
+        <table tableName="ids">
+            <generatedKey column="ids_id" sqlStatement="MySql" identity="true"/>
         </table>
-        <table tableName="task_meta_cfg">
-            <generatedKey column="task_type" sqlStatement="MySql" identity="true"/>
+        <table tableName="user_ids">
+            <generatedKey column="user_ids_id" sqlStatement="MySql" identity="true"/>
         </table>
     </context>
 </generatorConfiguration>

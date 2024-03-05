@@ -31,7 +31,8 @@ public class TransactionLogReceiver implements Observer{
         List<Integer> logGroup =  parser.parseLogLine(msg.getHeader().getPid(), msg.getBody().getContent());
         msg.getProperty().getEndTimestamp().add(System.currentTimeMillis());
         if (logGroup != null) {
-           msg.getBody().setContent(JSONObject.toJSONString(logGroup));
+            msg.getHeader().setCount(msg.getHeader().getCount() + 1);
+            msg.getBody().setContent(JSONObject.toJSONString(logGroup));
             KafkaClient.send(topic, JSONObject.toJSONString(msg));
         }
     }

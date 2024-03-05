@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="info.jiaying.back_end.mapper.IdsMapper">
+  <resultMap id="BaseResultMap" type="info.jiaying.back_end.model.Ids">
+    <id column="ids_id" jdbcType="INTEGER" property="idsId" />
+    <result column="os" jdbcType="VARCHAR" property="os" />
+    <result column="app_name" jdbcType="VARCHAR" property="appName" />
+    <result column="access_type" jdbcType="INTEGER" property="accessType" />
+    <result column="type_name" jdbcType="VARCHAR" property="typeName" />
+    <result column="type_code" jdbcType="INTEGER" property="typeCode" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ids_id, os, app_name, access_type, type_name, type_code
+  </sql>
+  <select id="selectByExample" parameterType="info.jiaying.back_end.model.IdsExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from ids
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from ids
+    where ids_id = #{idsId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from ids
+    where ids_id = #{idsId,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="info.jiaying.back_end.model.IdsExample">
+    delete from ids
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="info.jiaying.back_end.model.Ids">
+    <selectKey keyProperty="idsId" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into ids (os, app_name, access_type, 
+      type_name, type_code)
+    values (#{os,jdbcType=VARCHAR}, #{appName,jdbcType=VARCHAR}, #{accessType,jdbcType=INTEGER}, 
+      #{typeName,jdbcType=VARCHAR}, #{typeCode,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="info.jiaying.back_end.model.Ids">
+    <selectKey keyProperty="idsId" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into ids
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="os != null">
+        os,
+      </if>
+      <if test="appName != null">
+        app_name,
+      </if>
+      <if test="accessType != null">
+        access_type,
+      </if>
+      <if test="typeName != null">
+        type_name,
+      </if>
+      <if test="typeCode != null">
+        type_code,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="os != null">
+        #{os,jdbcType=VARCHAR},
+      </if>
+      <if test="appName != null">
+        #{appName,jdbcType=VARCHAR},
+      </if>
+      <if test="accessType != null">
+        #{accessType,jdbcType=INTEGER},
+      </if>
+      <if test="typeName != null">
+        #{typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="typeCode != null">
+        #{typeCode,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="info.jiaying.back_end.model.IdsExample" resultType="java.lang.Long">
+    select count(*) from ids
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update ids
+    <set>
+      <if test="record.idsId != null">
+        ids_id = #{record.idsId,jdbcType=INTEGER},
+      </if>
+      <if test="record.os != null">
+        os = #{record.os,jdbcType=VARCHAR},
+      </if>
+      <if test="record.appName != null">
+        app_name = #{record.appName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.accessType != null">
+        access_type = #{record.accessType,jdbcType=INTEGER},
+      </if>
+      <if test="record.typeName != null">
+        type_name = #{record.typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.typeCode != null">
+        type_code = #{record.typeCode,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update ids
+    set ids_id = #{record.idsId,jdbcType=INTEGER},
+      os = #{record.os,jdbcType=VARCHAR},
+      app_name = #{record.appName,jdbcType=VARCHAR},
+      access_type = #{record.accessType,jdbcType=INTEGER},
+      type_name = #{record.typeName,jdbcType=VARCHAR},
+      type_code = #{record.typeCode,jdbcType=INTEGER}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="info.jiaying.back_end.model.Ids">
+    update ids
+    <set>
+      <if test="os != null">
+        os = #{os,jdbcType=VARCHAR},
+      </if>
+      <if test="appName != null">
+        app_name = #{appName,jdbcType=VARCHAR},
+      </if>
+      <if test="accessType != null">
+        access_type = #{accessType,jdbcType=INTEGER},
+      </if>
+      <if test="typeName != null">
+        type_name = #{typeName,jdbcType=VARCHAR},
+      </if>
+      <if test="typeCode != null">
+        type_code = #{typeCode,jdbcType=INTEGER},
+      </if>
+    </set>
+    where ids_id = #{idsId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="info.jiaying.back_end.model.Ids">
+    update ids
+    set os = #{os,jdbcType=VARCHAR},
+      app_name = #{appName,jdbcType=VARCHAR},
+      access_type = #{accessType,jdbcType=INTEGER},
+      type_name = #{typeName,jdbcType=VARCHAR},
+      type_code = #{typeCode,jdbcType=INTEGER}
+    where ids_id = #{idsId,jdbcType=INTEGER}
+  </update>
+</mapper>
