@@ -39,11 +39,18 @@ public class EsClient {
     }
 
     public static void indexDoc(String idx, String id, Object o) throws IOException {
+        if (!existIdx(idx)) {
+            createIdx(idx);
+        }
         IndexResponse resp = esClient.index(i -> i
                 .index(String.valueOf(idx))
                 .id(id)
                 .document(o)
         );
+    }
+
+    public static boolean existIdx(String idx) throws IOException {
+         return esClient.exists(b -> b.index(idx)).value();
     }
 
     public static void getDoc(String idx, String id, Class<?> clazz) throws IOException {
@@ -58,5 +65,7 @@ public class EsClient {
         }
     }
 
-    public static void main(String[] args) throws IOException {}
+    public static void main(String[] args) throws IOException {
+        EsClient.createIdx("2");
+    }
 }

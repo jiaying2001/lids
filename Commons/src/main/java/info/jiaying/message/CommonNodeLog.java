@@ -15,4 +15,5 @@ public class CommonNodeLog {
     private int count;
     private long create_time;
     private int type;
+    private String path;
 }

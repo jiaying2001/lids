@@ -18,8 +18,8 @@ public class Launcher {
 
     public Launcher() {
 //        logDispatcher.addReceiver(new LogReceiver());
-        logDispatcher.addReceiver(new TransactionLogReceiver());
         logDispatcher.addReceiver(new TraceReceiver());
+        logDispatcher.addReceiver(new TransactionLogReceiver());
     }
 
     public void launch() throws InvocationTargetException, IllegalAccessException, InterruptedException {

@@ -23,7 +23,7 @@ public class KafkaClient {
         Properties props = new Properties();
 //        props.put("bootstrap.servers", "124.221.34.29:9092");
         props.put("bootstrap.servers", "jiaying.info:9092");
-        props.put("group.id", "l1");
+        props.put("group.id", "l3");
         props.put("enable.auto.commit", "true");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");

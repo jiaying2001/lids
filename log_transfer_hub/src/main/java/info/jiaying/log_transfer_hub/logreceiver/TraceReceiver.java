@@ -23,9 +23,11 @@ public class TraceReceiver implements Observer{
                 .type(MessageType.HEAD.getCode())
                 .create_time(System.currentTimeMillis())
                 .log(msg.getBody().getContent())
+                .path(msg.getHeader().getPath())
                 .build();
         singleStore = log1;
         try {
+            log.info("Sending {} to ES", log1);
             EsClient.indexDoc(log1.getUser_id(), log1.getTrace_id() + "_" + log1.getCount(), log1);
         } catch (IOException e) {
             log.error("Error sending to elasticsearch");

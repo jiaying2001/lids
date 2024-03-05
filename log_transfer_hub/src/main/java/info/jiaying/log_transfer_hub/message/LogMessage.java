@@ -23,6 +23,7 @@ public class LogMessage {
         // Name convention: os_appName_type
         private String topic;
         private int count;
+        private String path;
     }
 
     public enum FeatureExtraction {
