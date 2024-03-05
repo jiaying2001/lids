@@ -1,11 +1,10 @@
 package info.jiaying.log_transfer_hub.logreceiver;
 
-import com.alibaba.fastjson2.JSON;
+import cn.hutool.core.bean.BeanUtil;
 import com.alibaba.fastjson2.JSONObject;
 import info.jiaying.log_transfer_hub.logparser.PIDLogParser;
 import info.jiaying.log_transfer_hub.message.LogMessage;
 import info.jiaying.log_transfer_hub.util.kafka.client.KafkaClient;
-import info.jiaying.message.TrackHeadNodeLog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,6 +15,9 @@ public class TransactionLogReceiver implements Observer{
     Map<String, PIDLogParser> parsers = new HashMap<>();
     @Override
     public void ONRECEIVE(LogMessage msg) {
+        LogMessage msgCopy = new LogMessage();
+        BeanUtil.copyProperties(msg, msgCopy);
+        msg = msgCopy;
         if (msg.getProperty().getStartTimestamp() == null) {
             msg.getProperty().setStartTimestamp(new ArrayList<>());
         }
@@ -38,7 +40,7 @@ public class TransactionLogReceiver implements Observer{
     }
 
     @Override
-    public void ONFINISH(TrackHeadNodeLog msg) {
+    public void ONFINISH(LogMessage msg) {
 
     }
 }

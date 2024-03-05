@@ -1,10 +1,7 @@
-package info.jiaying.message;
+package info.jiaying.c.message;
 
-import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
-
-import java.util.Date;
 
 @Data
 @SuperBuilder
