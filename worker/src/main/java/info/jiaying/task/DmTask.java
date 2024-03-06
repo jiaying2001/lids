@@ -61,5 +61,6 @@ public class DmTask {
         cfg.setAppName("sshd");
         cfg.setAccessType("public");
         t.deploy("test", cfg);
+
     }
 }

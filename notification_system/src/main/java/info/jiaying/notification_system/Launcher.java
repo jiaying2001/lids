@@ -1,15 +1,17 @@
 package info.jiaying.notification_system;
 
 import com.alibaba.fastjson2.JSONObject;
-import info.jiaying.log_transfer_hub.event.LogEvent;
-import info.jiaying.log_transfer_hub.logdispatcher.LogDispatcher;
-import info.jiaying.log_transfer_hub.logdispatcher.ObserverManager;
-import info.jiaying.log_transfer_hub.message.LogMessage;
+import info.jiaying.notification_system.event.LogEvent;
 import info.jiaying.notification_system.event.listener.AuditListener;
+import info.jiaying.notification_system.logdispatcher.LogDispatcher;
+import info.jiaying.notification_system.logdispatcher.ObserverManager;
+import info.jiaying.notification_system.message.LogMessage;
 import info.jiaying.notification_system.utile.client.KafkaClient;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.lang.reflect.InvocationTargetException;
 
+@SpringBootApplication
 public class Launcher {
     private final ObserverManager logDispatcher = new LogDispatcher();
 

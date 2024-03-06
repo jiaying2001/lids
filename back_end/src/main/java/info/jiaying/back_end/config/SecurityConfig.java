@@ -43,7 +43,7 @@ public class SecurityConfig extends CommonSecurityConfig{
         @Bean
         CorsConfigurationSource corsConfigurationSource() {
             CorsConfiguration configuration = new CorsConfiguration();
-            configuration.addAllowedOrigin("http://localhost:5173"); // Allow all origins
+            configuration.addAllowedOrigin("*"); // Allow all origins
             configuration.addAllowedMethod("GET");
             configuration.addAllowedMethod("POST");
             configuration.addAllowedMethod("OPTIONS"); // Optional: Allow OPTIONS for pre-flight requests

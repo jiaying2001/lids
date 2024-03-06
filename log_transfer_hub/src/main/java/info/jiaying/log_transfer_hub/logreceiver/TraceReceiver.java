@@ -1,11 +1,11 @@
 package info.jiaying.log_transfer_hub.logreceiver;
 
 import cn.hutool.core.bean.BeanUtil;
-import info.jiaying.c.es.EsClient;
-import info.jiaying.c.message.MessageType;
-import info.jiaying.c.message.TrackHeadNodeLog;
-import info.jiaying.c.message.TrackNodeLog;
+import info.jiaying.log_transfer_hub.es.EsClient;
 import info.jiaying.log_transfer_hub.message.LogMessage;
+import info.jiaying.log_transfer_hub.message.MessageType;
+import info.jiaying.log_transfer_hub.message.TrackHeadNodeLog;
+import info.jiaying.log_transfer_hub.message.TrackNodeLog;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
