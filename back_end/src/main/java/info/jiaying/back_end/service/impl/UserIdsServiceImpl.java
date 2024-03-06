@@ -28,7 +28,7 @@ public class UserIdsServiceImpl implements UserIdsService {
     public void grant(int userId, int idsId) {
         UserIds userIds = new UserIds();
         userIds.setIdsId(idsId);
-        userIds.setUserId(idsId);
+        userIds.setUserId(userId);
         userIdsMapper.insert(userIds);
     }
 

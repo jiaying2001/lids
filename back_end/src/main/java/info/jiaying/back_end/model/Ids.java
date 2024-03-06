@@ -1,21 +1,27 @@
 package info.jiaying.back_end.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
 
 public class Ids implements Serializable {
+    @JsonProperty("ids_id")
     private Integer idsId;
 
     private String os;
 
+    @JsonProperty("app_name")
     private String appName;
 
+    @JsonProperty("access_type")
     @ApiModelProperty(value = "public or private access")
     private Integer accessType;
 
+    @JsonProperty("type_name")
     @ApiModelProperty(value = "indicates which method applied in the ids")
     private String typeName;
 
+    @JsonProperty("type_code")
     private Integer typeCode;
 
     private static final long serialVersionUID = 1L;
