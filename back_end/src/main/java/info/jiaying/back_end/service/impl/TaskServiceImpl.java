@@ -7,16 +7,12 @@ import info.jiaying.back_end.mapper.TaskMapper;
 import info.jiaying.back_end.model.Task;
 import info.jiaying.back_end.model.TaskExample;
 import info.jiaying.back_end.model.TaskMetaCfg;
-import info.jiaying.back_end.service.TaskMetaCfgService;
+import info.jiaying.back_end.model.TaskStatus;
 import info.jiaying.back_end.service.TaskService;
-import org.ehcache.xml.model.TimeUnit;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.sql.Time;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -58,5 +54,19 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void update(Task task) {
         taskMapper.updateByPrimaryKey(task);
+    }
+
+    @Override
+    public List<Task> getExecutingTasks(int userId) {
+        TaskExample e = getNewTaskExample();
+        e.createCriteria().andUserIdEqualTo(String.valueOf(userId)).andStatusNotEqualTo((byte) TaskStatus.SUCCESS.getStatus());
+        return taskMapper.selectByExample(e);
+    }
+
+    TaskExample TE = new TaskExample();
+
+    private TaskExample getNewTaskExample() {
+        TE.clear();
+        return TE;
     }
 }
