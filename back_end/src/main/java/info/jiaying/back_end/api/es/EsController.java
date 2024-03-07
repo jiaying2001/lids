@@ -1,4 +1,4 @@
-package info.jiaying.back_end.api;
+package info.jiaying.back_end.api.es;
 
 import info.jiaying.back_end.dto.CommonResponse;
 import info.jiaying.back_end.service.EsService;
