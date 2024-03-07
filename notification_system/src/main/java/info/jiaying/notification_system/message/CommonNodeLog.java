@@ -13,4 +13,5 @@ public class CommonNodeLog {
     private long create_time;
     private int type;
     private String path;
+    private String app_name;
 }

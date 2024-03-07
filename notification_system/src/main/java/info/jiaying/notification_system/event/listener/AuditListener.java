@@ -14,6 +14,7 @@ public class AuditListener implements Observer {
     @Override
     public void ONRECEIVE(LogMessage msg) {
         TrackTailNodeLog log1 = TrackTailNodeLog.builder()
+                .app_name(msg.getHeader().getAppName())
                 .node_name("notification")
                 .path(msg.getHeader().getPath())
                 .user_id(String.valueOf(msg.getHeader().getUserId()))

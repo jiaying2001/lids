@@ -16,6 +16,7 @@ public class TraceReceiver implements Observer{
     @Override
     public void ONRECEIVE(LogMessage msg) {
         TrackHeadNodeLog log1 = TrackHeadNodeLog.builder()
+                .app_name(msg.getHeader().getAppName())
                 .node_name("log_hub")
                 .user_id(String.valueOf(msg.getHeader().getUserId()))
                 .trace_id(msg.getHeader().getTraceId())
