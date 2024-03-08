@@ -29,4 +29,9 @@ public class EsController {
     public CommonResponse getAvgTime(@AuthenticationPrincipal UserDetails userDetails) {
         return CommonResponse.success(EsService.getAvgTime(String.valueOf(userService.getUserIdByName(userDetails.getUsername()))));
     }
+
+    @GetMapping("transaction")
+    public CommonResponse getTrasaction(@RequestParam("trace_uuid") String traceUuid) {
+        return CommonResponse.success(EsService.getTransactionByUserIdAndUuid( userService.getUserId(), traceUuid));
+    }
 }

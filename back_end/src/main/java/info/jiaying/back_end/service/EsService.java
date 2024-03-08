@@ -1,15 +1,19 @@
 package info.jiaying.back_end.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.SortOptions;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.aggregations.*;
 import co.elastic.clients.elasticsearch._types.query_dsl.*;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.json.JsonData;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import info.jiaying.back_end.model.MessageType;
+import info.jiaying.back_end.model.TrackHeadNodeLog;
+import info.jiaying.back_end.model.TrackTailNodeLog;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
@@ -144,7 +148,159 @@ public class EsService {
     }
     public static void main(String[] args) throws IOException {
 //        EsService.getDetectAvgTime("2");
+        EsService.getTransactionByUserIdAndUuid(2, "cc50a440-3c95-4223-8cb2-9da69463aa21");
    }
 
+    public static List<Map<String, String>> getTransactionByUserIdAndUuid(int userId, String traceUuid) {
+        try {
+            // Get log of TAIL type for the trace uuid
+            Query matchTraceId = MatchQuery.of(m -> m
+                    .field("trace_id.keyword")
+                    .query(traceUuid)
+            )._toQuery();
+            Query matchType = MatchQuery.of(m -> m
+                    .field("type")
+                    .query(MessageType.TAIL.getCode())
+            )._toQuery();
+            Query query = BoolQuery.of(
+                    bq -> bq.
+                            must(
+                                    List.of(matchTraceId, matchType)
+                            )
+            )._toQuery();
+            SearchResponse<Object> sr = esClient.search(q -> q
+                            .index(String.valueOf(userId))
+                            .size(1)
+                            .query(query)
+                , Object.class);
+            Map<String, String> log = (Map<String, String>) sr.hits().hits().get(0).source();
+            List<Query> queries =buildMatchQueries(
+                    "path.keyword", log.get("path"),
+                    "app_name.keyword", log.get("app_name"),
+                    "type", String.valueOf(MessageType.TAIL.getCode())
+            );
+            queries.add(RangeQuery.of(
+                            rq -> rq
+                                    .field("create_time")
+                                    .lte(JsonData.of(String.valueOf(log.get("create_time"))))
+                                    )._toQuery());
+            Query q2 = BoolQuery.of(bq -> bq
+                    .must(queries)
+            )._toQuery();
+            SearchResponse sr1 = esClient.search(q -> q
+                            .size(2)
+                            .sort(
+                                    s -> s
+                                            .field(
+                                                    f -> f
+                                                            .field("create_time")
+                                                            .order(SortOrder.Desc)
+                                            )
+                            )
+                            .query(q2)
+                    , Object.class);
+           List<Query> qs3 =buildMatchQueries(
+                    "path.keyword", log.get("path"),
+                    "app_name.keyword", log.get("app_name"),
+                    "type", String.valueOf(MessageType.HEAD.getCode())
+           );
+           List<Hit> hits = sr1.hits().hits();
+
+            qs3.add(RangeQuery.of(
+                    rq -> rq
+                            .field("create_time")
+                            .lt(
+                                    JsonData.of(
+                                            String.valueOf(
+                                                    getDocByTraceIdAndType(
+                                                            ((Map<String, String>)hits.get(0).source()).get("trace_id"), MessageType.HEAD
+                                                    ).get("create_time")
+                                            )
+                                    )
+                            )
+                            .gte(
+                                    JsonData.of(
+                                            String.valueOf(
+                                                    getDocByTraceIdAndType(
+                                                            ((Map<String, String>)hits.get(1).source()).get("trace_id"), MessageType.HEAD
+                                                    ).get("create_time")
+                                            )
+                                    )
+                            )
+                )._toQuery());
+            Query q3 = BoolQuery.of(
+                    bq -> bq.
+                            must(
+                                    qs3
+                            )
+            )._toQuery();
+            SearchResponse<Object> sr2 = esClient.search(
+                    sq -> sq
+                            .sort(
+                                    s -> s
+                                            .field(
+                                                    f -> f
+                                                            .field("create_time")
+                                                            .order(SortOrder.Desc)
+                                            )
+                            )
+                            .query(q3)
+                    , Object.class);
+            return sr2.hits().hits().stream().map(hit -> ((Map<String, String>)hit.source())).toList();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static Map<String, String> getDocByTraceIdAndType(String traceId, MessageType messageType) {
+       return buildSearch(buildBoolMust(buildMatchQueries(
+               "trace_id", traceId,
+               "type", String.valueOf(messageType.getCode())
+       ))).get(0);
+    }
+    public static List<Map<String, String>> buildSearch(Query query) {
+        try {
+            SearchResponse<Object> sr =  esClient.search(
+                    s -> s
+                            .query(query)
+            , Object.class);
+            return sr.hits().hits().stream().map(
+              hit -> (Map<String, String>) hit.source()
+            ).toList();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public static Query buildBoolMust(List<Query> queries) {
+       return BoolQuery.of(
+               bq -> bq
+                       .must(queries)
+       )._toQuery();
+    }
+
+    public static  List<Query> buildMatchQueries(String field, String value, String... params) {
+        List<Query> queries = new ArrayList<>(params.length / 2 + 1);
+        queries.add(buildMatchQuery(field, value));
+        for (int i = 0; i < params.length; i += 2) {
+            field = params[i];
+            value = params[i + 1];
+            if (field != null && value != null) {
+                queries.add(buildMatchQuery(field, value));
+            }
+        }
+        return queries;
+    }
+
+    public static Query buildMatchQuery(String field, String value) {
+       return MatchQuery.of(m -> m
+               .field(field)
+               .query(value)
+       )._toQuery();
+    }
+
+
+//    public static List<> getTransactionByUuid(String traceUuid) {
+//    }
 }
 
